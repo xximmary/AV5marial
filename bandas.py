@@ -131,5 +131,5 @@ with Session(engine) as session:
               # ... verifica se o numero q o usuario pediu é o mesmo da
               # posicao na lista
               if i == nroex - 1:
-                   # deleta a info da posição certa
+                   # deleta a info da posição certaa
                    del lista_musicas[i]
