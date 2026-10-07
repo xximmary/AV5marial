@@ -5,18 +5,25 @@
 #declarativebase é uma base para as classes que serão transformadas em tabelas no db
 #mapped é pra dizer que um atributo da classe será associado a u campo do db
 
-from sqlalchemy import create_engine, String, Integer
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
+from sqlalchemy import create_engine, String, Integer, ForeignKey
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session, relationship
 
 class Base(DeclarativeBase):
     pass
 
-class Banda:
-    def __init__(self, nome : str, genero :str, pais : str, ano_lancamento : str, ):
-        self.nome = nome
-        self.genero = genero
-        self.pais = pais
-        self.ano = ano_lancamento
+engine = create_engine("sqlite:///bandas.db")
+
+class Banda(Base):
+    __tablename__ = "bandas"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nome: Mapped[str] = mapped_column(String)
+    genero: Mapped[str] = mapped_column(String)
+    pais: Mapped[str] = mapped_column(String)
+    ano: Mapped[str] = mapped_column(String)
+
+    musicas: Mapped[list["Musica"]] = relationship()
+    
     def __str__(self):
         return f'''
 BANDA
@@ -26,13 +33,18 @@ BANDA
     ano lançamento: {self.ano}
 '''
 
-class Musica:
-    def __init__(self, titulo : str, duracao_segundos : int, bpm : int, genero : str, banda : Banda):
-        self.titulo = titulo
-        self.duracao = duracao_segundos
-        self.bpm = bpm
-        self.genero = genero
-        self.banda = banda
+class Musica(Base):
+    __tablename__ = "musicas"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    titulo: Mapped[str] = mapped_column(String)
+    duracao: Mapped[int] = mapped_column(Integer)
+    bpm: Mapped[int] = mapped_column(Integer)
+    genero: Mapped[str] = mapped_column(String)
+
+    banda_id: Mapped[int] = mapped_column(ForeignKey("bandas.id"))
+    banda: Mapped["Banda"] = relationship()
+
     def __str__(self):
         return f'''   MUSICA
     titulo: {self.titulo}
@@ -42,41 +54,82 @@ class Musica:
     banda: {self.banda}
 '''
 
-print("Olá, seja bem-vindo(a). por favor, escolha uma das opções a seguir:")
-print("1. Inserir")
-print("2. Listar")
-print("3. Excluir")
-opc = input()
+lista_musicas = []
 
-#se o usuário quer inserir...
-if opc == "1":
-        print("Inserindo dados para a banda...")
-        nome = input("Nome da banda: ")
-        genero = input("Gênero: ")
-        pais = input("País: ")
-        ano = input("Ano de lançamento: ")
+# base.metadata... faz o sqlalchemy olhar para as classes que defini como Base e cria
+# no db as tabelas que ainda nao existem com as colunas que eu definia
+Base.metadata.create_all(engine)
+with Session(engine) as session:
+    # programa fica aqui dentro
 
-        #banda é do tipo da classe Banda e recebe os atributos que o 
-        #usuário disse
-        banda = Banda(nome, genero, pais, ano)
+    print("Olá, seja bem-vindo(a). por favor, escolha uma das opções a seguir:")
+    print("1. Inserir")
+    print("2. Listar")
+    print("3. Excluir")
+    opc = input()
 
-        #mandou as info para o db
-        session.add(banda)
-        session.commit()
+    #se o usuário quer inserir...
+    if opc == "1":
+            print("Inserindo dados para a banda...")
+            nome = input("Nome da banda: ")
+            genero = input("Gênero: ")
+            pais = input("País: ")
+            ano = input("Ano de lançamento: ")
 
-        print("Banda inserida com sucesso!")
+            #banda é do tipo da classe Banda e recebe os atributos que o 
+            #usuário disse
+            banda = Banda(
+                 nome = nome,
+                 genero = genero,
+                 pais = pais,
+                 ano = ano
+            )
 
-        #fazendo o mesmo processo para música...
-        print("\nInserindo dados para a música...")
-        titulo = input("Título da música: ")
-        duracao = int(input("Duração em segundos: "))
-        bpm = int(input("BPM: "))
-        genero = input("Gênero: ")
+            #mandou as info para o db
+            session.add(banda)
+            session.commit()
 
-        musica = Musica(titulo, duracao, bpm, genero, banda)
+            print("Banda inserida com sucesso!")
 
-        session.add(musica)
-        session.commit()
+            #fazendo o mesmo processo para música...
+            print("\nInserindo dados para a música...")
+            titulo = input("Título da música: ")
+            duracao = int(input("Duração em segundos: "))
+            bpm = int(input("BPM: "))
+            genero = input("Gênero: ")
 
-        print("Música cadastrada com sucesso!")
-#inserção 100% completa
+            musica = Musica(
+                titulo = titulo,
+                duracao = duracao,
+                bpm = bpm,
+                genero = genero,
+                banda = banda)
+
+            session.add(musica)
+            session.commit()
+
+            lista_musicas.append(musica)
+            print("Música cadastrada com sucesso!")
+        #inserção 100% completa
+
+    if opc == "2":
+         print("Listando...")
+         for i in range(lista_musicas):
+              print("música nro", i)
+              print(lista_musicas[i])
+
+    if opc == "3":
+         # percorre as musicas ja criadas na lista que armazena elas
+         for i in range(lista_musicas):
+              print(i+1, musica.nome)
+              print("da banda", musica.banda.nome)
+              print('')
+
+         nroex = int(input("Qual o nro da música que você deseja excluir?"))
+         # percorre a lista de musicas de novo e...
+         for i in range (lista_musicas):
+              # ... verifica se o numero q o usuario pediu é o mesmo da
+              # posicao na lista
+              if i == nroex - 1:
+                   # deleta a info da posição certa
+                   del lista_musicas[i]
