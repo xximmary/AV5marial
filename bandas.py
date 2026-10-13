@@ -4,8 +4,9 @@
 #integer é o tipo de dado usado para números inteiros no db
 #declarativebase é uma base para as classes que serão transformadas em tabelas no db
 #mapped é pra dizer que um atributo da classe será associado a u campo do db
+#select serve para montar uma consulta que busca informações no db
 
-from sqlalchemy import create_engine, String, Integer, ForeignKey
+from sqlalchemy import create_engine, String, Integer, ForeignKey, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session, relationship
 
 class Base(DeclarativeBase):
@@ -51,7 +52,7 @@ class Musica(Base):
     duração em segundos: {self.duracao}
     BPM: {self.bpm}
     gênero: {self.genero}
-    banda: {self.banda}
+    banda: {self.banda.nome}
 '''
 
 lista_musicas = []
@@ -66,6 +67,7 @@ with Session(engine) as session:
     print("1. Inserir")
     print("2. Listar")
     print("3. Excluir")
+    print("4. Sair")
     opc = input()
 
     #se o usuário quer inserir...
@@ -112,24 +114,53 @@ with Session(engine) as session:
             print("Música cadastrada com sucesso!")
         #inserção 100% completa
 
-    if opc == "2":
-         print("Listando...")
-         for i in range(lista_musicas):
-              print("música nro", i)
-              print(lista_musicas[i])
+    elif opc == "2":
+         print("\n Listando as bandas...")
 
-    if opc == "3":
-         # percorre as musicas ja criadas na lista que armazena elas
-         for i in range(lista_musicas):
-              print(i+1, musica.nome)
-              print("da banda", musica.banda.nome)
-              print('')
+        # consulta vai representar objetos da classe Banda
+         consulta = select(Banda)
+        # executa a consulta e retorna os objetos encontrados sendo como consulta/sendo do tipo Banda
+         bandas = session.scalars(consulta)
 
-         nroex = int(input("Qual o nro da música que você deseja excluir?"))
-         # percorre a lista de musicas de novo e...
-         for i in range (lista_musicas):
-              # ... verifica se o numero q o usuario pediu é o mesmo da
-              # posicao na lista
-              if i == nroex - 1:
-                   # deleta a info da posição certaa
-                   del lista_musicas[i]
+        # percorre todas as bandas encontradas e da print nelas
+         for banda in bandas:
+              print(banda)
+
+        # começa a fazer o mesmo passo a passo para musicas...
+         print("\n Listando as musicas...")
+         consulta = select(Musica)
+         musicas = session.scalars(consulta)
+         for musica in musicas:
+              print(musica)
+
+    elif opc == "3":
+         print("O que você deseja excluir?")
+         print("1. Banda")
+         print("2. Musica")
+         escolha = input()
+
+        # os dois if fazem a mesma coisa, so que um pra banda e outro pra musica
+         if escolha == "1":
+              # mesmo passo a passo de antes (na opc 2)
+              consulta = select(Banda)
+              bandas = session.scalars(consulta)
+              for banda in bandas:
+                   print("ID:", banda.id)
+                   print(banda)
+
+              id_banda = int(input("Digite o ID da banda que deseja apagar:"))
+              #consulta vai ser um objeto do tipo Banda que tiver o mesmo id que o usuário escolheu (guardado na variavel id_banda)
+              consulta = select(Banda).where(Banda.id == id_banda)
+              # retorna o objeto
+              banda = session.scalar(consulta)
+
+         if escolha == "2":
+             consulta = select(Musica)
+             musicas = session.scalars(consulta)
+             for musica in musicas:
+                 print("ID:", musica.id)
+                 print(musica)
+
+             id_musica = int(input("Digite o ID da música que deseja apagar:"))
+             consulta = select(Banda).where(Banda.id == id_banda)
+             banda = session.scalar(consulta)
