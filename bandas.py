@@ -28,8 +28,7 @@ class Banda(Base):
     
     def __str__(self):
         return f'''
-BANDA
-    nome: {self.nome}
+{self.nome}
     gênero: {self.genero}
     país: {self.pais}
     ano lançamento: {self.ano}
@@ -49,15 +48,13 @@ class Musica(Base):
     banda: Mapped["Banda"] = relationship(back_populates="musicas")
 
     def __str__(self):
-        return f'''   MUSICA
-    titulo: {self.titulo}
+        return f'''   
+{self.titulo}
     duração em segundos: {self.duracao}
     BPM: {self.bpm}
     gênero: {self.genero}
     banda: {self.banda.nome}
 '''
-
-lista_musicas = []
 
 # base.metadata... faz o sqlalchemy olhar para as classes que defini como Base e cria
 # no db as tabelas que ainda nao existem com as colunas que eu definia
@@ -66,12 +63,13 @@ Base.metadata.create_all(engine)
 with Session(engine) as session:
     # programa fica aqui dentro
     opc = ""
-    while opc != "4":
-        print("Olá, seja bem-vindo(a). por favor, escolha uma das opções a seguir:")
-        print("1. Inserir")
-        print("2. Listar")
-        print("3. Excluir")
-        print("4. Sair")
+    while opc != "5":
+        print("\nPor favor, escolha uma das opções a seguir:")
+        print("1. Inserir BANDA")
+        print("2. Inserir MUSICA")
+        print("3. Listar")
+        print("4. Excluir")
+        print("5. Sair")
         opc = input()
 
         #se o usuário quer inserir...
@@ -97,28 +95,44 @@ with Session(engine) as session:
 
                 print("Banda inserida com sucesso!")
 
-                #fazendo o mesmo processo para música...
-                print("\nInserindo dados para a música...")
-                titulo = input("Título da música: ")
-                duracao = int(input("Duração em segundos: "))
-                bpm = int(input("BPM: "))
-                genero = input("Gênero: ")
-
-                musica = Musica(
-                    titulo = titulo,
-                    duracao = duracao,
-                    bpm = bpm,
-                    genero = genero,
-                    banda = banda)
-
-                session.add(musica)
-                session.commit()
-
-                lista_musicas.append(musica)
-                print("Música cadastrada com sucesso!")
-            #inserção 100% completa
-
         elif opc == "2":
+                #fazendo o mesmo processo de banda para música...
+                print("\nInserindo dados para a música...")
+
+                # o significado das coisas abaixo está no prox. elif =)
+                consulta = select(Banda)
+                bandas = session.scalars(consulta)
+
+                for banda in bandas:
+                    print(banda.nome)
+                    print("ID:", banda.id)
+                
+                id_banda = int(input("Digite o ID da banda da música:"))
+                consulta = select(Banda).where(Banda.id == id_banda)
+                banda = session.scalar(consulta)
+
+                if banda:
+                    titulo = input("Título da música: ")
+                    duracao = int(input("Duração em segundos: "))
+                    bpm = int(input("BPM: "))
+                    genero = input("Gênero: ")
+
+                    musica = Musica(
+                        titulo = titulo,
+                        duracao = duracao,
+                        bpm = bpm,
+                        genero = genero,
+                        banda = banda)
+
+                    session.add(musica)
+                    session.commit()
+
+                    print("Música cadastrada com sucesso!")
+                   #inserção 100% completa
+                else:
+                    print("Banda não encontrada!")
+
+        elif opc == "3":
             print("\n Listando as bandas...")
 
             # consulta vai representar objetos da classe Banda
@@ -137,7 +151,7 @@ with Session(engine) as session:
             for musica in musicas:
                 print(musica)
 
-        elif opc == "3":
+        elif opc == "4":
             print("O que você deseja excluir?")
             print("1. Banda")
             print("2. Musica")
@@ -171,8 +185,8 @@ with Session(engine) as session:
                         session.commit()
                         print("Banda excluída com sucesso!")
                 else:
-                    ("Banda não encontrada!S")
-            if escolha == "2":
+                    print("Banda não encontrada!")
+            elif escolha == "2":
                 consulta = select(Musica)
                 musicas = session.scalars(consulta)
                 for musica in musicas:
