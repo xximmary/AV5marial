@@ -3,8 +3,7 @@ Sequência para baixar meu programa do repositório e depois executá-lo:
 
             BAIXAR  
 I. Entre no terminal e digite: git clone https://github.com/xximmary/AV5marial
-    |--> desse jeito, todos os arquivos necessários serão baixados automá-
-    ticamente para sua máquina =)
+    |--> desse jeito, todos os arquivos necessários serão baixados automáticamente para sua máquina =)
 
             EXECUTAR
 I. Ainda no terminal, digite: cd AV5marial
