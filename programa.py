@@ -1,10 +1,10 @@
 
-#create_engine é uma "ponte" entre o programa e o db
-#string é só o tipo de dado usado para teto no db
-#integer é o tipo de dado usado para números inteiros no db
-#declarativebase é uma base para as classes que serão transformadas em tabelas no db
-#mapped é pra dizer que um atributo da classe será associado a u campo do db
-#select serve para montar uma consulta que busca informações no db
+# create_engine é uma "ponte" entre o programa e o db
+# string é só o tipo de dado usado para teto no db
+# integer é o tipo de dado usado para números inteiros no db
+# declarativebase é uma base para as classes que serão transformadas em tabelas no db
+# mapped é pra dizer que um atributo da classe será associado a u campo do db
+# select serve para montar uma consulta que busca informações no db
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,7 +16,6 @@ print("1. SQLite")
 print("2. MySQL")
 escolha = input("")
 
-<<<<<<< HEAD:programa.py
 if escolha == "1":
     engine = conectar_sqlite()
 elif escolha == "2":
@@ -24,76 +23,19 @@ elif escolha == "2":
 else:
     print("Opção inválida!")
     exit()
-=======
-engine = create_engine("sqlite:///bandas.db")
-
-class Banda(Base):
-    __tablename__ = "bandas"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    nome: Mapped[str] = mapped_column(String)
-    genero: Mapped[str] = mapped_column(String)
-    pais: Mapped[str] = mapped_column(String)
-    ano: Mapped[str] = mapped_column(String)
-
-    # back_populates vai relacionar "musicas" da classe Banda à "banda" da classe Musica
-    musicas: Mapped[list["Musica"]] = relationship(back_populates="banda")
-    
-    def __str__(self):
-        return f'''
-{self.nome}
-    gênero: {self.genero}
-    país: {self.pais}
-    ano lançamento: {self.ano}
-'''
-
-class Musica(Base):
-    __tablename__ = "musicas"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    titulo: Mapped[str] = mapped_column(String)
-    duracao: Mapped[int] = mapped_column(Integer)
-    bpm: Mapped[int] = mapped_column(Integer)
-    genero: Mapped[str] = mapped_column(String)
-
-    banda_id: Mapped[int] = mapped_column(ForeignKey("bandas.id"))
-    # back_populates vai relacionar "banda" da classe Musica à "musicas" da classe Banda
-    banda: Mapped["Banda"] = relationship(back_populates="musicas")
-
-    def __str__(self):
-        return f'''   
-{self.titulo}
-    duração em segundos: {self.duracao}
-    BPM: {self.bpm}
-    gênero: {self.genero}
-    banda: {self.banda.nome}
-'''
-
-# base.metadata... faz o sqlalchemy olhar para as classes que defini como Base e cria
-# no db as tabelas que ainda nao existem com as colunas que eu definia
-Base.metadata.create_all(engine)
->>>>>>> e2689fc6a101e9dc2ca364acfda61cead3215d82:bandas.py
 
 # programa real fica aqui dentro
 with Session(engine) as session:
     
     opc = ""
-<<<<<<< HEAD:programa.py
     while opc != "6":
-=======
-    while opc != "5":
->>>>>>> e2689fc6a101e9dc2ca364acfda61cead3215d82:bandas.py
         print("\nPor favor, escolha uma das opções a seguir:")
         print("1. Inserir BANDA")
         print("2. Inserir MUSICA")
         print("3. Listar")
         print("4. Excluir")
-<<<<<<< HEAD:programa.py
         print("5. Mudar BANCO DE DADOS")
         print("6. Sair")
-=======
-        print("5. Sair")
->>>>>>> e2689fc6a101e9dc2ca364acfda61cead3215d82:bandas.py
         opc = input()
 
         #se o usuário quer inserir...
